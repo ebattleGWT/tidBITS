@@ -37,15 +37,19 @@ def create_note():
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow()
     )
+    db.session.add(new_note)  # Add the Note object to the session
+    db.session.flush()  # Ensure the Note object gets an ID before associating tags
+    
     tag_names = data.get('tags', [])
+    print(f"Received tags for new note: {tag_names}")  # Debugging line
     for tag_name in tag_names:
         tag = Tag.query.filter_by(name=tag_name).first()
         if not tag:
             tag = Tag(name=tag_name)
             db.session.add(tag)
         new_note.tags.append(tag)
+    print(f"Tags to be saved: {[tag.name for tag in new_note.tags]}")  # Debugging line
     
-    db.session.add(new_note)
     db.session.commit()
     
     return jsonify(new_note.to_dict()), 201
@@ -77,14 +81,21 @@ def update_note(note_id):
     note.content = data.get('content', note.content)
     note.updated_at = db.func.now()
     
-    try:
-        db.session.commit()
-        print(f"Note {note_id} updated successfully")
-        return jsonify(note.to_dict())
-    except Exception as e:
-        db.session.rollback()
-        print(f"Error updating note {note_id}: {str(e)}")
-        return jsonify({"error": "Failed to update note"}), 500
+    # Update tags
+    if 'tags' in data:
+        new_tags = []
+        print(f"Received tags for update: {data['tags']}")  # Debugging line
+        for tag_name in data['tags']:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                db.session.add(tag)
+            new_tags.append(tag)
+        note.tags = new_tags
+        print(f"Tags to be saved: {[tag.name for tag in note.tags]}")  # Debugging line
+    
+    db.session.commit()
+    return jsonify(note.to_dict())
 
 @bp.route('/notes/<int:note_id>', methods=['DELETE'])
 @jwt_required()
