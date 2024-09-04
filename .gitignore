@@ -1,11 +1,13 @@
 # Dependencies
 notebits/node_modules
+node_modules
 notesback/venv
 /.pnp
 .pnp.js
 
 # Build outputs
 /build
+notebits/build
 /dist
 
 # Environment variables
