@@ -18,7 +18,7 @@ function Sidebar({ tags, selectedTag, setSelectedTag, onRenameTag, onDeleteTag, 
       <div className={`sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}></div>
       <div className={`sidebar ${isOpen ? 'open' : ''}`}>
         <button className="close-button" onClick={onClose}>×</button>
-        <h2>tidBITs</h2>
+        <h2>Schedule</h2>
         <ul className="tag-list">
           <li 
             onClick={() => handleTagClick(null)} 
