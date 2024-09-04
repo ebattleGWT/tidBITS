@@ -1,0 +1,22 @@
+.draggable-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .draggable-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.draggable-item {
+  /* Remove any specific styling here */
+}
+
+@media (max-width: 600px) {
+  .draggable-list {
+    grid-template-columns: 1fr;
+  }
+}
