@@ -118,3 +118,41 @@ def delete_note(note_id):
         db.session.rollback()
         print(f"Error deleting note {note_id}: {str(e)}")
         return jsonify({"error": "Failed to delete note"}), 500
+
+@bp.route('/tags', methods=['GET', 'OPTIONS'])
+@jwt_required()
+@cross_origin(supports_credentials=True)
+def get_tags():
+    if request.method == 'OPTIONS':
+        return '', 200
+    user_id = get_jwt_identity()
+    tags = Tag.query.join(Note.tags).filter(Note.user_id == user_id, Note.is_deleted == False).distinct().all()
+    return jsonify([tag.name for tag in tags])
+
+@bp.route('/tags', methods=['PUT'])
+@jwt_required()
+@cross_origin(supports_credentials=True)
+def update_tags():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    
+    if not data or 'tags' not in data:
+        return jsonify({"error": "No tags provided"}), 400
+    
+    new_tags = data['tags']
+    
+    # Get all user's notes
+    user_notes = Note.query.filter_by(user_id=user_id, is_deleted=False).all()
+    
+    # Update tags for all user's notes
+    for note in user_notes:
+        note.tags = []
+        for tag_name in new_tags:
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                db.session.add(tag)
+            note.tags.append(tag)
+    
+    db.session.commit()
+    return jsonify({"message": "Tags updated successfully"}), 200
