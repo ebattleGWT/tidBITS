@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # Set the new branch name
-NEW_BRANCH="design_update"
+NEW_BRANCH="frontend-patch-1"
 
 # Update frontend (notebits)
 echo "Updating frontend..."
 cd notebits
 git checkout -b $NEW_BRANCH
 git add .
-git commit -m "Fixed menu for the notes"
+git commit -m "frontend patch since the frontend wasnt syncing with github"
 git push -u origin $NEW_BRANCH
 
 # Update backend (notesback)
@@ -16,7 +16,7 @@ echo "Updating backend..."
 cd ../notesback
 git checkout -b $NEW_BRANCH
 git add .
-git commit -m "Updated backend components"
+git commit -m "add gitignore to the backend"
 git push -u origin $NEW_BRANCH
 
 echo "Updating Core branch"
