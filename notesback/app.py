@@ -18,9 +18,12 @@ def create_app(config_class=Config):
     JWTManager(app)
     db.init_app(app)
     migrate.init_app(app, db)
-    from routes import auth, notes
-    app.register_blueprint(auth.bp, url_prefix='/api')
-    app.register_blueprint(notes.bp, url_prefix='/api')
+
+    from routes.auth import auth_bp
+    from routes.notes import notes_bp
+    
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(notes_bp)
 
     @app.after_request
     def after_request(response):

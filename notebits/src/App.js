@@ -120,12 +120,27 @@ function App() {
 
   const loadTags = useCallback(async () => {
     try {
+      console.log("Fetching tags...");
       const fetchedTags = await tagService.fetchTags();
-      setTags(fetchedTags);
+      console.log("Fetched tags:", fetchedTags);
+      if (Array.isArray(fetchedTags) && fetchedTags.length > 0) {
+        setTags(fetchedTags);
+      } else {
+        console.warn("Fetched tags is empty or not an array:", fetchedTags);
+      }
     } catch (error) {
       console.error('Error fetching tags:', error);
+      setTags([]);
     }
   }, []);
+
+  useEffect(() => {
+    loadTags();
+  }, []); // Run once on component mount
+
+  useEffect(() => {
+    console.log("Tags in App state updated:", tags);
+  }, [tags]);
 
   const loadNotes = useCallback(async () => {
     try {
@@ -141,6 +156,7 @@ function App() {
   }, []);
 
   useEffect(() => {
+    console.log("Tags in App state:", tags);
     const fetchData = async () => {
       if (isAuthenticated) {
         await loadNotes();

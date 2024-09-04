@@ -4,9 +4,9 @@ from flask_cors import cross_origin
 from models import User
 from app import db
 
-bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__)
 
-@bp.route('/login', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/api/login', methods=['POST', 'OPTIONS'])
 @cross_origin(supports_credentials=True)
 def login():
     if request.method == 'OPTIONS':
@@ -29,7 +29,7 @@ def login():
         return jsonify(access_token=access_token), 200
     return jsonify({"message": "Invalid username or password"}), 401
 
-@bp.route('/register', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/api/register', methods=['POST', 'OPTIONS'])
 @cross_origin(supports_credentials=True)
 def register():
     if request.method == 'OPTIONS':
@@ -70,13 +70,13 @@ def register():
         current_app.logger.error(f"Error registering user: {str(e)}")
         return jsonify({"message": "An error occurred while registering the user"}), 500
 
-@bp.route('/logout', methods=['POST'])
+@auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
     # In a real-world scenario, you might want to blacklist the token here
     return jsonify({"msg": "Successfully logged out"}), 200
 
-@bp.route('/users', methods=['GET'])
+@auth_bp.route('/users', methods=['GET'])
 @jwt_required()
 def get_users():
     users = User.query.all()
