@@ -1,6 +1,6 @@
 # Dependencies
-/node_modules
-/notesback/venv
+notebits/node_modules
+notesback/venv
 /.pnp
 .pnp.js
 
