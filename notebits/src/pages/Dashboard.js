@@ -1,51 +1,59 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import NoteList from '../components/NoteList';
 import NoteModal from '../components/NoteModal';
 import './Dashboard.css';
+import Sidebar from '../components/Sidebar';
+import useUIVisibility from '../hooks/useUIVisibility';
 
-function Dashboard({ notes, selectedTag, onCreateNote, onUpdateNote, onDeleteNote, tags, onAddTag, onReorderNotes, isModalOpen, setIsModalOpen, currentNote, setCurrentNote, onSaveNote }) {
-  const [filteredNotes, setFilteredNotes] = useState([]);
+function Dashboard({ 
+  notes, 
+  selectedTag, 
+  onCreateNote, 
+  onUpdateNote, 
+  onDeleteNote, 
+  tags, 
+  onAddTag, 
+  onReorderNotes, 
+  isModalOpen, 
+  setIsModalOpen, 
+  currentNote, 
+  setCurrentNote, 
+  onSaveNote,
+  setSelectedTag,
+  onRenameTag,
+  onDeleteTag,
+  onChangeTagColor,
+  onLogout
+}) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchVisible, setIsSearchVisible] = useState(true);
-  const [lastScrollTop, setLastScrollTop] = useState(0);
+  const { isSearchVisible, isSidebarOpen, handleScroll } = useUIVisibility();
 
-  const filterNotes = useCallback(() => {
-    const filtered = notes.filter(note => 
+  const filteredNotes = useMemo(() => {
+    return notes.filter(note => 
       (selectedTag ? note.tags.includes(selectedTag) : true) &&
       (note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
        note.content.toLowerCase().includes(searchQuery.toLowerCase()))
     );
-    setFilteredNotes(filtered);
   }, [notes, selectedTag, searchQuery]);
 
-  useEffect(() => {
-    filterNotes();
-  }, [filterNotes]);
-
-  const handleNoteClick = (note) => {
+  const handleNoteClick = useCallback((note) => {
     setCurrentNote(note);
     setIsModalOpen(true);
-  };
+  }, [setCurrentNote, setIsModalOpen]);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setCurrentNote(null);
     setIsModalOpen(false);
-  };
+  }, [setCurrentNote, setIsModalOpen]);
 
-  const handleSaveNote = (updatedNote) => {
+  const handleSaveNote = useCallback((updatedNote) => {
     onSaveNote(updatedNote);
     handleCloseModal();
-  };
+  }, [onSaveNote, handleCloseModal]);
 
-  const handleScroll = useCallback((e) => {
-    const scrollTop = e.target.scrollTop;
-    if (scrollTop > lastScrollTop && scrollTop > 50) {
-      setIsSearchVisible(false);
-    } else {
-      setIsSearchVisible(true);
-    }
-    setLastScrollTop(scrollTop);
-  }, [lastScrollTop]);
+  const handleScrollWrapper = useCallback((e) => {
+    handleScroll(e.target.scrollTop);
+  }, [handleScroll]);
 
   return (
     <div className="dashboard">
@@ -58,7 +66,7 @@ function Dashboard({ notes, selectedTag, onCreateNote, onUpdateNote, onDeleteNot
           className="search-input"
         />
       </div>
-      <div className="notes-container" onScroll={handleScroll}>
+      <div className="notes-container" onScroll={handleScrollWrapper}>
         <NoteList 
           notes={filteredNotes}
           onUpdateNote={onUpdateNote}
@@ -77,6 +85,17 @@ function Dashboard({ notes, selectedTag, onCreateNote, onUpdateNote, onDeleteNot
           onAddTag={onAddTag}
         />
       )}
+      <Sidebar
+        isOpen={isSidebarOpen}
+        tags={tags}
+        selectedTag={selectedTag}
+        setSelectedTag={setSelectedTag}
+        onRenameTag={onRenameTag}
+        onDeleteTag={onDeleteTag}
+        onChangeTagColor={onChangeTagColor}
+        onLogout={onLogout}
+        onCreateNote={onCreateNote}
+      />
     </div>
   );
 }
