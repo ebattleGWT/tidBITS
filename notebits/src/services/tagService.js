@@ -1,6 +1,6 @@
 import api from './api';
 
-export const fetchTags = async () => {
+const getTags = async () => {
   try {
     const response = await api.get('/tags');
     return response.data;
@@ -10,7 +10,7 @@ export const fetchTags = async () => {
   }
 };
 
-export const updateTags = async (tags) => {
+const updateTags = async (tags) => {
   try {
     const response = await api.put('/tags', { tags });
     return response.data;
@@ -21,7 +21,7 @@ export const updateTags = async (tags) => {
 };
 
 const tagService = {
-  fetchTags,
+  getTags,
   updateTags
 };
 
