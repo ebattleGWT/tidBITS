@@ -24,41 +24,56 @@ def handle_tags():
             # If there's no valid JWT, return an empty list or an appropriate response
             return jsonify([])
 
-@notes_bp.route('/api/notes', methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
+@notes_bp.route('/api/notes', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required()
 @cross_origin(supports_credentials=True)
 def handle_notes():
-    if request.method == 'OPTIONS':
-        response = jsonify({})
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-        return response
+    user_id = get_jwt_identity()
     
-    # For all other methods, require JWT
-    @jwt_required()
-    def protected_notes():
-        user_id = get_jwt_identity()
-        
-        if request.method == 'GET':
-            tag_filter = request.args.get('tag')
-            if tag_filter:
-                notes = Note.query.filter(Note.user_id == user_id, Note.tags.any(name=tag_filter), Note.is_deleted == False).all()
-            else:
-                notes = Note.query.filter_by(user_id=user_id, is_deleted=False).all()
-            return jsonify([note.to_dict() for note in notes])
-        
-        elif request.method == 'POST':
-            # Your existing POST logic here
-            pass
-        
-        elif request.method == 'PUT':
-            # Your existing PUT logic here
-            pass
-        
-        elif request.method == 'DELETE':
-            # Your existing DELETE logic here
-            pass
-
-    return protected_notes()
+    if request.method == 'GET':
+        tag_filter = request.args.get('tag')
+        if tag_filter:
+            notes = Note.query.filter(Note.user_id == user_id, Note.tags.any(name=tag_filter), Note.is_deleted == False).all()
+        else:
+            notes = Note.query.filter_by(user_id=user_id, is_deleted=False).all()
+        return jsonify([note.to_dict() for note in notes])
+    
+    elif request.method == 'POST':
+        data = request.get_json()
+        new_note = Note(title=data['title'], content=data['content'], user_id=user_id)
+        for tag_name in data.get('tags', []):
+            tag = Tag.query.filter_by(name=tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+            new_note.tags.append(tag)
+        db.session.add(new_note)
+        db.session.commit()
+        return jsonify(new_note.to_dict()), 201
+    
+    elif request.method == 'PUT':
+        data = request.get_json()
+        note = Note.query.get(data['id'])
+        if note and note.user_id == user_id:
+            note.title = data['title']
+            note.content = data['content']
+            note.tags = []
+            for tag_name in data.get('tags', []):
+                tag = Tag.query.filter_by(name=tag_name).first()
+                if not tag:
+                    tag = Tag(name=tag_name)
+                note.tags.append(tag)
+            db.session.commit()
+            return jsonify(note.to_dict()), 200
+        return jsonify({"message": "Note not found"}), 404
+    
+    elif request.method == 'DELETE':
+        note_id = request.args.get('id')
+        note = Note.query.get(note_id)
+        if note and note.user_id == user_id:
+            note.is_deleted = True
+            db.session.commit()
+            return '', 204
+        return jsonify({"message": "Note not found"}), 404
 
 @notes_bp.route('/api/notes/<int:note_id>', methods=['GET'])
 @jwt_required()
