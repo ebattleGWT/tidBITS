@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 function useUIVisibility() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,13 +21,6 @@ function useUIVisibility() {
     }
     lastScrollTop.current = scrollTop;
   }, []);
-
-  useEffect(() => {
-    const searchContainer = document.querySelector('.search-container');
-    if (searchContainer) {
-      searchContainer.style.transform = isSidebarOpen ? 'translateY(-100%)' : 'translateY(0)';
-    }
-  }, [isSidebarOpen]);
 
   return {
     isSidebarOpen,

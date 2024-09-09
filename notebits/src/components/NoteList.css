@@ -3,22 +3,19 @@
 }
 
 .note-item {
-    position: relative;
-    margin-bottom: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    height: 220px;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 15px;
-    cursor: move;
-    transition: box-shadow 0.3s ease;
-    height: 200px;
-    overflow: hidden;
 }
 
 .note-item:hover {
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .note-header {
@@ -26,40 +23,52 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 10px;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .note-header h3 {
     margin: 0;
-    font-size: 1.2em;
     flex-grow: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-right: 30px;
+    padding-right: 10px;
+    font-size: 18px;
+    color: #333;
 }
 
 .note-content {
+    padding: 15px;
     flex-grow: 1;
-    margin-bottom: 10px;
-    cursor: pointer;
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
-    -webkit-box-orient: vertical;
 }
 
 .note-tags {
+    padding: 10px 15px;
+    background-color: #f5f7fa;
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
 }
 
 .note-tag {
-    background-color: #e0e0e0;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.8em;
+    background-color: #e1e8f0;
+    color: #4a5568;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
 }
 
 /* Remove any other conflicting styles */
+
+/* Adjust the NoteMenu component styles */
+.note-menu {
+    position: relative;
+}
+
+/* You might need to adjust these styles based on your NoteMenu implementation */
+.note-menu button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 18px;
+}

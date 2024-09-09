@@ -1,101 +1,84 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import NoteList from '../components/NoteList';
 import NoteModal from '../components/NoteModal';
 import './Dashboard.css';
-import Sidebar from '../components/Sidebar';
-import useUIVisibility from '../hooks/useUIVisibility';
 
-function Dashboard({ 
-  notes, 
-  selectedTag, 
-  onCreateNote, 
-  onUpdateNote, 
-  onDeleteNote, 
-  tags, 
-  onAddTag, 
-  onReorderNotes, 
-  isModalOpen, 
-  setIsModalOpen, 
-  currentNote, 
-  setCurrentNote, 
-  onSaveNote,
-  setSelectedTag,
-  onRenameTag,
-  onDeleteTag,
-  onChangeTagColor,
-  onLogout
-}) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const { isSearchVisible, isSidebarOpen, handleScroll } = useUIVisibility();
+function Dashboard({ notes, tags, onCreateNote, onUpdateNote, onDeleteNote, fetchNotes }) {
+  const [selectedNote, setSelectedNote] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredNotes = useMemo(() => {
-    return notes.filter(note => 
-      (selectedTag ? note.tags.includes(selectedTag) : true) &&
-      (note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       note.content.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  }, [notes, selectedTag, searchQuery]);
+  useEffect(() => {
+    fetchNotes();
+  }, [fetchNotes]);
 
-  const handleNoteClick = useCallback((note) => {
-    setCurrentNote(note);
+  const handleNoteClick = (note) => {
+    setSelectedNote(note);
     setIsModalOpen(true);
-  }, [setCurrentNote, setIsModalOpen]);
+  };
 
-  const handleCloseModal = useCallback(() => {
-    setCurrentNote(null);
+  const handleNoteCreate = () => {
+    const newNote = { title: '', content: '', tags: [] };
+    setSelectedNote(newNote);
+    setIsModalOpen(true);
+  };
+
+  const handleNoteSave = (updatedNote) => {
+    if (updatedNote.id) {
+      onUpdateNote(updatedNote);
+    } else {
+      onCreateNote(updatedNote);
+    }
     setIsModalOpen(false);
-  }, [setCurrentNote, setIsModalOpen]);
+    setSelectedNote(null);
+  };
 
-  const handleSaveNote = useCallback((updatedNote) => {
-    onSaveNote(updatedNote);
-    handleCloseModal();
-  }, [onSaveNote, handleCloseModal]);
+  const handleNoteDelete = (noteId) => {
+    onDeleteNote(noteId);
+    setIsModalOpen(false);
+    setSelectedNote(null);
+  };
 
-  const handleScrollWrapper = useCallback((e) => {
-    handleScroll(e.target.scrollTop);
-  }, [handleScroll]);
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedNote(null);
+  };
+
+  const filteredNotes = notes.filter(note => 
+    note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="dashboard">
-      <div className={`search-container ${isSearchVisible ? 'visible' : ''}`}>
-        <input 
-          type="text" 
-          placeholder="Search notes..." 
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+      <div className="search-container">
+        <input
+          type="text"
           className="search-input"
+          placeholder="Search notes..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div className="notes-container" onScroll={handleScrollWrapper}>
-        <NoteList 
+      <div className="notes-container">
+        <NoteList
           notes={filteredNotes}
           onUpdateNote={onUpdateNote}
           onDeleteNote={onDeleteNote}
           onNoteClick={handleNoteClick}
-          onReorderNotes={onReorderNotes}
         />
       </div>
       {isModalOpen && (
         <NoteModal
-          note={currentNote}
-          onClose={handleCloseModal}
-          onSave={handleSaveNote}
-          onDelete={onDeleteNote}
+          note={selectedNote}
+          onClose={handleModalClose}
+          onSave={handleNoteSave}
+          onDelete={handleNoteDelete}
           tags={tags}
-          onAddTag={onAddTag}
         />
       )}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        tags={tags}
-        selectedTag={selectedTag}
-        setSelectedTag={setSelectedTag}
-        onRenameTag={onRenameTag}
-        onDeleteTag={onDeleteTag}
-        onChangeTagColor={onChangeTagColor}
-        onLogout={onLogout}
-        onCreateNote={onCreateNote}
-      />
+      <button className="create-note-button" onClick={handleNoteCreate}>+</button>
     </div>
   );
 }

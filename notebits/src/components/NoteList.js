@@ -2,7 +2,7 @@ import React from 'react';
 import NoteMenu from './NoteMenu';
 import './NoteList.css';
 
-function NoteList({ notes, onUpdateNote, onDeleteNote, onNoteClick, onReorderNotes }) {
+function NoteList({ notes, onUpdateNote, onDeleteNote, onNoteClick }) {
   const truncateText = (text, maxLength) => {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
@@ -21,7 +21,7 @@ function NoteList({ notes, onUpdateNote, onDeleteNote, onNoteClick, onReorderNot
         <p>{truncateText(note.content, 100)}</p>
       </div>
       <div className="note-tags">
-        {note.tags.map(tag => (
+        {note.tags && note.tags.map(tag => (
           <span key={tag} className="note-tag">{tag}</span>
         ))}
       </div>
@@ -30,7 +30,7 @@ function NoteList({ notes, onUpdateNote, onDeleteNote, onNoteClick, onReorderNot
 
   return (
     <div className="note-list">
-      {notes.map(renderNote)}
+      {notes && notes.length > 0 ? notes.map(renderNote) : <p>No notes found.</p>}
     </div>
   );
 }
