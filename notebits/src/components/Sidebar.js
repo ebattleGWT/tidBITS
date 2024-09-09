@@ -1,11 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import './Sidebar.css';
 
-function Sidebar({ tags, onLogout, onCreateNote, isOpen, onClose }) {
-  useEffect(() => {
-    console.log('Sidebar isOpen:', isOpen);
-  }, [isOpen]);
-
+function Sidebar({ tags, onLogout, onCreateNote, isOpen, onClose, onTagClick, selectedTag }) {
   return (
     <>
       <div className={`sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}></div>
@@ -14,7 +10,13 @@ function Sidebar({ tags, onLogout, onCreateNote, isOpen, onClose }) {
         <ul className="tag-list">
           {tags && tags.length > 0 ? (
             tags.map((tag, index) => (
-              <li key={index} className="sidebar-tag">{tag}</li>
+              <li 
+                key={index} 
+                className={`sidebar-tag ${selectedTag === tag ? 'selected' : ''}`}
+                onClick={() => onTagClick(tag)}
+              >
+                {tag}
+              </li>
             ))
           ) : (
             <li>No tags available</li>

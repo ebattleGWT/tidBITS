@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useNotes } from './hooks/useNotes';
@@ -13,6 +13,7 @@ function AppContent() {
   const { isAuthenticated, logout } = useAuth();
   const { isSidebarOpen, toggleSidebar, closeSidebar } = useUIVisibility();
   const { notes, tags, fetchNotes, createNote, updateNote, deleteNote } = useNotes();
+  const [selectedTag, setSelectedTag] = useState(null);
 
   // Add this useEffect to fetch notes and tags when the component mounts
   React.useEffect(() => {
@@ -30,6 +31,14 @@ function AppContent() {
     return Array.from(tagSet);
   }, [notes]);
 
+  const handleTagClick = (tag) => {
+    setSelectedTag(tag === selectedTag ? null : tag);
+  };
+
+  const filteredNotes = selectedTag
+    ? notes.filter(note => note.tags.includes(selectedTag))
+    : notes;
+
   return (
     <div className={`App ${isSidebarOpen ? 'sidebar-open' : ''}`}>
       {isAuthenticated && (
@@ -38,7 +47,7 @@ function AppContent() {
             {isSidebarOpen ? '×' : '☰'}
           </button>
           <Sidebar
-            tags={uniqueTags}  // Pass uniqueTags instead of tags
+            tags={uniqueTags}
             onLogout={logout}
             onCreateNote={() => {
               const newNote = { title: 'New Note', content: '', tags: [] };
@@ -46,6 +55,8 @@ function AppContent() {
               closeSidebar();
             }}
             isOpen={isSidebarOpen}
+            onTagClick={handleTagClick}
+            selectedTag={selectedTag}
           />
         </>
       )}
@@ -58,12 +69,14 @@ function AppContent() {
             element={
               isAuthenticated ? (
                 <Dashboard
-                  notes={notes}
-                  tags={tags}
+                  notes={filteredNotes}
+                  tags={uniqueTags}
                   onCreateNote={createNote}
                   onUpdateNote={updateNote}
                   onDeleteNote={deleteNote}
                   fetchNotes={fetchNotes}
+                  selectedTag={selectedTag}
+                  onClearFilter={() => setSelectedTag(null)}
                 />
               ) : (
                 <Navigate to="/login" />

@@ -3,7 +3,7 @@ import NoteList from '../components/NoteList';
 import NoteModal from '../components/NoteModal';
 import './Dashboard.css';
 
-function Dashboard({ notes, tags, onCreateNote, onUpdateNote, onDeleteNote, fetchNotes }) {
+function Dashboard({ notes, tags, onCreateNote, onUpdateNote, onDeleteNote, fetchNotes, selectedTag, onClearFilter }) {
   const [selectedNote, setSelectedNote] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,6 +60,12 @@ function Dashboard({ notes, tags, onCreateNote, onUpdateNote, onDeleteNote, fetc
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        {selectedTag && (
+          <div className="selected-tag">
+            Filtered by: {selectedTag}
+            <button onClick={onClearFilter}>Clear</button>
+          </div>
+        )}
       </div>
       <div className="notes-container">
         <NoteList

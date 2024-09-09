@@ -97,4 +97,15 @@
     padding: 4px 8px;
     margin: 4px 0;
     display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-tag:hover {
+    background-color: #e0e0e0;
+}
+
+.sidebar-tag.selected {
+    background-color: #007bff;
+    color: white;
 }
