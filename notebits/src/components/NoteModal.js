@@ -4,8 +4,8 @@ import 'react-quill/dist/quill.snow.css';
 import './NoteModal.css';
 import TagSelector from './TagSelector';
 
-function NoteModal({ note, onClose, onSave, onDelete, tags, onAddTag }) {
-  const [editedNote, setEditedNote] = useState({ ...note, tags: note?.tags || [] });
+function NoteModal({ note, onClose, onSave, onDelete, tags, folders, onAddTag }) {
+  const [editedNote, setEditedNote] = useState({ ...note, tags: note?.tags || [], folderId: note?.folderId || null });
 
   useEffect(() => {
     setEditedNote({ ...note });
@@ -58,6 +58,11 @@ function NoteModal({ note, onClose, onSave, onDelete, tags, onAddTag }) {
     }
   };
 
+  const handleFolderChange = (e) => {
+    const folderId = e.target.value;
+    setEditedNote(prev => ({ ...prev, folderId }));
+  };
+
   const modules = {
     toolbar: [
       [{ 'header': [1, 2, false] }],
@@ -94,6 +99,12 @@ function NoteModal({ note, onClose, onSave, onDelete, tags, onAddTag }) {
           formats={formats}
           placeholder="Note Content"
         />
+        <select value={editedNote.folderId || ''} onChange={handleFolderChange}>
+          <option value="">No Folder</option>
+          {folders.map(folder => (
+            <option key={folder.id} value={folder.id}>{folder.name}</option>
+          ))}
+        </select>
         <TagSelector
           tags={tags || []}
           selectedTags={editedNote.tags}

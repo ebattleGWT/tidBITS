@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import NoteList from '../components/NoteList';
 import NoteModal from '../components/NoteModal';
+import FolderList from '../components/FolderList';
 import './Dashboard.css';
 
-function Dashboard({ notes, tags, onCreateNote, onUpdateNote, onDeleteNote, fetchNotes, selectedTag, onClearFilter }) {
+function Dashboard({ 
+  notes, 
+  tags, 
+  folders, 
+  onCreateNote, 
+  onUpdateNote, 
+  onDeleteNote, 
+  onCreateFolder,
+  onDeleteFolder,  // Add this prop
+  fetchNotes, 
+  selectedTag, 
+  onClearFilter 
+}) {
   const [selectedNote, setSelectedNote] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchNotes();
@@ -14,12 +28,6 @@ function Dashboard({ notes, tags, onCreateNote, onUpdateNote, onDeleteNote, fetc
 
   const handleNoteClick = (note) => {
     setSelectedNote(note);
-    setIsModalOpen(true);
-  };
-
-  const handleNoteCreate = () => {
-    const newNote = { title: '', content: '', tags: [] };
-    setSelectedNote(newNote);
     setIsModalOpen(true);
   };
 
@@ -42,6 +50,25 @@ function Dashboard({ notes, tags, onCreateNote, onUpdateNote, onDeleteNote, fetc
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedNote(null);
+  };
+
+  const handleActionButtonClick = () => {
+    setIsActionMenuOpen(!isActionMenuOpen);
+  };
+
+  const handleCreateNote = () => {
+    const newNote = { title: '', content: '', tags: [] };
+    setSelectedNote(newNote);
+    setIsModalOpen(true);
+    setIsActionMenuOpen(false);
+  };
+
+  const handleCreateFolder = () => {
+    const folderName = prompt("Enter folder name:");
+    if (folderName) {
+      onCreateFolder(folderName);
+      setIsActionMenuOpen(false);
+    }
   };
 
   const filteredNotes = notes.filter(note => 
@@ -82,9 +109,18 @@ function Dashboard({ notes, tags, onCreateNote, onUpdateNote, onDeleteNote, fetc
           onSave={handleNoteSave}
           onDelete={handleNoteDelete}
           tags={tags}
+          folders={folders}
         />
       )}
-      <button className="create-note-button" onClick={handleNoteCreate}>+</button>
+      <div className="action-button-container">
+        <button className="action-button" onClick={handleActionButtonClick}>+</button>
+        {isActionMenuOpen && (
+          <div className="action-menu">
+            <button onClick={handleCreateNote}>Add Note</button>
+            <button onClick={handleCreateFolder}>Add Folder</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,14 +1,16 @@
 import { useState, useCallback, useEffect } from 'react';
 import noteService from '../services/noteService';
 import tagService from '../services/tagService';
+import folderService from '../services/folderService';
 
 export function useNotes() {
   const [notes, setNotes] = useState([]);
   const [tags, setTags] = useState([]);
+  const [folders, setFolders] = useState([]);
 
-  const fetchNotes = useCallback(async (tag) => {
+  const fetchNotes = useCallback(async (folderId) => {
     try {
-      const response = await noteService.fetchNotes(tag);
+      const response = await noteService.fetchNotes(folderId);
       setNotes(response.data);
     } catch (error) {
       console.error('Error fetching notes:', error);
@@ -24,10 +26,20 @@ export function useNotes() {
     }
   }, []);
 
+  const fetchFolders = useCallback(async () => {
+    try {
+      const response = await folderService.fetchFolders();
+      setFolders(response.data);
+    } catch (error) {
+      console.error('Error fetching folders:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchNotes();
     fetchTags();
-  }, [fetchNotes, fetchTags]);
+    fetchFolders();
+  }, [fetchNotes, fetchTags, fetchFolders]);
 
   const createNote = useCallback(async (note) => {
     try {
@@ -64,5 +76,48 @@ export function useNotes() {
     }
   }, [fetchTags]);
 
-  return { notes, tags, fetchNotes, createNote, updateNote, deleteNote, fetchTags };
+  const createFolder = useCallback(async (folder) => {
+    try {
+      const response = await folderService.createFolder(folder);
+      setFolders(prevFolders => [...prevFolders, response.data]);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating folder:', error);
+    }
+  }, []);
+
+  const updateFolder = useCallback(async (folder) => {
+    try {
+      const response = await folderService.updateFolder(folder);
+      setFolders(prevFolders => prevFolders.map(f => f.id === folder.id ? response.data : f));
+      return response.data;
+    } catch (error) {
+      console.error('Error updating folder:', error);
+    }
+  }, []);
+
+  const deleteFolder = useCallback(async (folderId) => {
+    try {
+      await folderService.deleteFolder(folderId);
+      setFolders(prevFolders => prevFolders.filter(folder => folder.id !== folderId));
+      // Optionally, you might want to handle notes in the deleted folder
+      setNotes(prevNotes => prevNotes.filter(note => note.folderId !== folderId));
+    } catch (error) {
+      console.error('Error deleting folder:', error);
+    }
+  }, []);
+
+  return { 
+    notes, 
+    tags, 
+    folders, 
+    fetchNotes, 
+    createNote, 
+    updateNote, 
+    deleteNote, 
+    fetchTags,
+    createFolder,
+    updateFolder,
+    deleteFolder
+  };
 }
