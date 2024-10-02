@@ -36,9 +36,15 @@
 }
 
 .note-content {
-    padding: 15px;
-    flex-grow: 1;
+    white-space: pre-line;
+    word-break: break-word;
     overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
+    max-height: 5.6em; /* 4 lines * 1.4 line-height */
 }
 
 .note-tags {

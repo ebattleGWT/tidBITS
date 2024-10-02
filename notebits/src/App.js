@@ -12,7 +12,7 @@ import './App.css';
 function AppContent() {
   const { isAuthenticated, logout } = useAuth();
   const { isSidebarOpen, toggleSidebar, closeSidebar } = useUIVisibility();
-  const { notes, tags, fetchNotes, createNote, updateNote, deleteNote } = useNotes();
+  const { notes, tags, folders, fetchNotes, createNote, updateNote, deleteNote, createFolder, deleteFolder } = useNotes();
   const [selectedTag, setSelectedTag] = useState(null);
 
   // Add this useEffect to fetch notes and tags when the component mounts
@@ -39,6 +39,28 @@ function AppContent() {
     ? notes.filter(note => note.tags.includes(selectedTag))
     : notes;
 
+  const handleMoveToFolder = async (itemId, itemType, folderId) => {
+    if (itemType === 'NOTE') {
+      const updatedNote = notes.find(note => note.id === itemId);
+      if (updatedNote) {
+        updatedNote.folderId = folderId;
+        await updateNote(updatedNote);
+      }
+    } else if (itemType === 'TAG') {
+      const notesWithTag = notes.filter(note => note.tags.includes(itemId));
+      for (const note of notesWithTag) {
+        note.folderId = folderId;
+        await updateNote(note);
+      }
+    }
+    fetchNotes();
+  };
+
+  const handleCreateFolder = async (name, parentId = null) => {
+    await createFolder({ name, parentId });
+    fetchNotes();
+  };
+
   return (
     <div className={`App ${isSidebarOpen ? 'sidebar-open' : ''}`}>
       {isAuthenticated && (
@@ -48,15 +70,19 @@ function AppContent() {
           </button>
           <Sidebar
             tags={uniqueTags}
+            folders={folders}
             onLogout={logout}
             onCreateNote={() => {
               const newNote = { title: 'New Note', content: '', tags: [] };
               createNote(newNote);
               closeSidebar();
             }}
+            onCreateFolder={handleCreateFolder}
             isOpen={isSidebarOpen}
+            onClose={closeSidebar}
             onTagClick={handleTagClick}
             selectedTag={selectedTag}
+            onMoveToFolder={handleMoveToFolder}
           />
         </>
       )}
@@ -71,9 +97,12 @@ function AppContent() {
                 <Dashboard
                   notes={filteredNotes}
                   tags={uniqueTags}
+                  folders={folders}
                   onCreateNote={createNote}
                   onUpdateNote={updateNote}
                   onDeleteNote={deleteNote}
+                  onCreateFolder={createFolder}
+                  onDeleteFolder={deleteFolder}  // Make sure this function is defined in your useNotes hook
                   fetchNotes={fetchNotes}
                   selectedTag={selectedTag}
                   onClearFilter={() => setSelectedTag(null)}

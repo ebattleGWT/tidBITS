@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import './NoteModal.css';
 import TagSelector from './TagSelector';
 
-function NoteModal({ note, onClose, onSave, onDelete, tags, onAddTag }) {
-  const [editedNote, setEditedNote] = useState({ ...note, tags: note?.tags || [] });
+function NoteModal({ note, onClose, onSave, onDelete, tags, folders, onAddTag }) {
+  const [editedNote, setEditedNote] = useState({ ...note, tags: note?.tags || [], folderId: note?.folderId || null });
 
   useEffect(() => {
     setEditedNote({ ...note });
   }, [note]);
 
-  const handleChange = (e) => {
+  const handleChange = (content, delta, source, editor) => {
+    setEditedNote(prev => ({ ...prev, content: content }));
+  };
+
+  const handleTitleChange = (e) => {
     const { name, value } = e.target;
     setEditedNote(prev => ({ ...prev, [name]: value }));
   };
@@ -52,6 +58,28 @@ function NoteModal({ note, onClose, onSave, onDelete, tags, onAddTag }) {
     }
   };
 
+  const handleFolderChange = (e) => {
+    const folderId = e.target.value;
+    setEditedNote(prev => ({ ...prev, folderId }));
+  };
+
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      ['link', 'image'],
+      ['clean']
+    ],
+  };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image'
+  ];
+
   return (
     <div className="note-modal-overlay" onClick={onClose}>
       <div className="note-modal-content" onClick={e => e.stopPropagation()}>
@@ -59,17 +87,24 @@ function NoteModal({ note, onClose, onSave, onDelete, tags, onAddTag }) {
           type="text"
           name="title"
           value={editedNote.title}
-          onChange={handleChange}
+          onChange={handleTitleChange}
           className="note-modal-title"
           placeholder="Note Title"
         />
-        <textarea
-          name="content"
+        <ReactQuill
+          theme="snow"
           value={editedNote.content}
           onChange={handleChange}
-          className="note-modal-content"
+          modules={modules}
+          formats={formats}
           placeholder="Note Content"
         />
+        <select value={editedNote.folderId || ''} onChange={handleFolderChange}>
+          <option value="">No Folder</option>
+          {folders.map(folder => (
+            <option key={folder.id} value={folder.id}>{folder.name}</option>
+          ))}
+        </select>
         <TagSelector
           tags={tags || []}
           selectedTags={editedNote.tags}
